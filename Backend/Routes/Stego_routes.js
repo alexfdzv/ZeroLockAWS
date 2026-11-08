@@ -4,17 +4,11 @@ const Image = require('../Models/Images');
 const User = require('../Models/User');
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
+const storage = require("../storage");
 const verifyToken = require('./authMiddleware');
 
-const imageStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../Images"));
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  }
-});
+// Las imágenes se reciben en memoria y se guardan en S3 (ver storage.js)
+const imageStorage = multer.memoryStorage();
 
 // const textStorage = multer.memoryStorage();
 
@@ -76,20 +70,15 @@ routerStego.post(
         //     STEGGY PART (safe)
         // ==============================
         try {
-          const fs = require("fs");
           const steggy = require("steggy");
-          const imagePath = req.file.path;
-          //const imagePath = req.files.image[0].path;
-          //const textContent = req.files.text[0].buffer.toString("utf8");
           const textContent = req.body.text;
-          console.log("Texto recibido del archivo:", textContent);
-          const original = fs.readFileSync(imagePath);
+          const original = req.file.buffer;
           const concealed = steggy.conceal()(original, textContent);
-          fs.writeFileSync(imagePath, concealed);
 
-          // Save to DB
-          const filename = path.basename(imagePath);
-          const cleanName = filename.split("-").slice(1).join("-");
+          // Guardar en S3: stego/<usuario>/<timestamp>-<nombre original>
+          const cleanName = path.basename(req.file.originalname);
+          const filename = `stego/${req.body.user_id}/${Date.now()}-${cleanName}`;
+          await storage.saveFile(filename, concealed, req.file.mimetype);
 
           const newImage = {
             user_id: req.body.user_id,
@@ -200,16 +189,13 @@ routerStego.delete('/:id', async (req, res) => {
         }
 
         console.log("Nombre real de la imagen a eliminar:", doc.fullname);
-        const imagePath = path.join(__dirname, "../Images", doc.fullname);
-
-        // Remove file asynchronously
-        fs.unlink(imagePath, (err) => {
-            if (err) {
-                console.error("No se pudo borrar la imagen del disco:", err);
-            } else {
-                console.log("Imagen eliminada del disco");
-            }
-        });
+        // Borrar el archivo de S3
+        try {
+            await storage.deleteFile(doc.fullname);
+            console.log("Imagen eliminada del almacenamiento");
+        } catch (err) {
+            console.error("No se pudo borrar la imagen del almacenamiento:", err);
+        }
 
         // Decrement counter
         const updatedUser = await User.findByIdAndUpdate(
@@ -237,18 +223,13 @@ routerStego.get('/extract/:id', async (req, res) => {
         if (!doc) {
             return res.status(404).json({ error: "Imagen no encontrada" });
         }
-        const fs = require("fs");
         const steggy = require("steggy");
-        // Full path to the saved image file
-        const imagePath = path.join(__dirname, '../Images', doc.fullname);
-
-        // Use steggy (or whichever library)
-        const buffer = fs.readFileSync(imagePath);
+        // Leer la imagen desde S3
+        const { buffer } = await storage.readFile(doc.fullname);
 
         const revealed = steggy.reveal(/* optional password */)(buffer /*, encoding */)
 
         const hiddenText = revealed.toString('utf8');
-        console.log("Hidden text:", hiddenText);
         res.json({
             message: "Texto extraído correctamente",
             text: hiddenText

@@ -5,3 +5,4 @@ node_modules/
 .vscode/
 Backend/Images/
 Backend/uploads/
+Backend/local-storage/
