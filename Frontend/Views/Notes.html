@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notas</title>
+
+  <!-- Bootstrap y FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="../Assets/Notes.css">
+  <script src="https://kit.fontawesome.com/5e25872797.js" crossorigin="anonymous"></script>
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+</head>
+
+<body>
+
+
+  <!-- ===== NAV BAR ===== -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="./Profile.html">
+        <img src="../Assets/Logo_ZeroLock.jpeg" alt="ZeroLock Logo" class="navbar-logo">
+        <span class="navbar-title">ZeroLock</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mynavbar">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item me-3">
+            <a class="nav-link active" href="./Passwords.html"><span class="glow-text">Contraseñas</span></a>
+          </li>
+          <li class="nav-item me-3">
+            <a class="nav-link active" href="./Notes.html"><span class="glow-text">Notas</span></a>
+          </li>
+          <li class="nav-item me-3">
+            <a class="nav-link active" href="./Stego.html"><span class="glow-text">Stego</span></a>
+          </li>
+          <li class="nav-item me-3">
+            <a class="nav-link active" href="./Hashes.html"><span class="glow-text">Comparador de hashes</span></a>
+          </li>
+        </ul>
+
+        <!-- Botón logout -->
+        <button type="button" class="btn navbar-logout-btn" data-bs-toggle="modal" data-bs-target="#modalLogout" title="Cerrar sesión">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== MAIN NOTES SECTION ===== -->
+  <div class="notes-container">
+    <h3 class="text-center mb-4" style="color:#b066ff;">MIS NOTAS</h3>
+
+    <div class="notes-grid">
+      <div class="note-card">
+        <div class="note-title">Título de la nota</div>
+        <div class="note-content">Contenido de la nota</div>
+        <div class="note-actions">
+          <button class="note-btn" data-bs-toggle="modal" data-bs-target="#modalEditNote">
+            <i class="fa-solid fa-pen-to-square"></i> Editar
+          </button>
+          <button class="note-btn" data-bs-toggle="modal" data-bs-target="#modalDeleteNote">
+            <i class="fa-solid fa-trash"></i> Borrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón para crear nueva nota -->
+  <button class="btn-new" title="Nueva nota" data-bs-toggle="modal" data-bs-target="#modalNewNote">NEW</button>
+
+  <footer class="footer">
+                <div class="footer-content">
+                    <p>© 2025 ZeroLock. All rights reserved.</p>
+                    <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Contact</a>
+                    </div>
+                </div>
+            </footer>
+
+  <!-- ===== MODALES ===== -->
+
+  <!-- Modal Nueva Nota -->
+  <div class="modal fade" id="modalNewNote" tabindex="-1" aria-labelledby="modalNewNoteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalNewNoteLabel">Nueva nota</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:invert(1);"></button>
+        </div>
+        <div class="modal-body">
+          <label for="noteTitle" class="form-label">Título:</label>
+          <input type="text" id="noteTitle" class="form-control mb-3" placeholder="Escribe el título de tu nota">
+          <label for="noteContent" class="form-label">Contenido:</label>
+          <div id="noteEditor" style="height: 200px;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Editar Nota -->
+  <div class="modal fade" id="modalEditNote" tabindex="-1" aria-labelledby="modalEditNoteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditNoteLabel">Editar nota</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:invert(1);"></button>
+        </div>
+        <div class="modal-body">
+          <label for="editNoteTitle" class="form-label">Título:</label>
+          <input type="text" id="editNoteTitle" class="form-control mb-3" value="Título actual">
+          <label for="editNoteContent" class="form-label">Contenido:</label>
+          <div id="editNoteEditor" style="height: 200px;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary">Actualizar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Eliminar Nota -->
+  <div class="modal fade" id="modalDeleteNote" tabindex="-1" aria-labelledby="modalDeleteNoteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalDeleteNoteLabel">Eliminar nota</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:invert(1);"></button>
+        </div>
+        <div class="modal-body text-center">
+          ¿Seguro que deseas eliminar esta nota?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Logout -->
+  <div class="modal fade" id="modalLogout" tabindex="-1" aria-labelledby="modalLogoutLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm" style="margin-top: 100px;">
+      <div class="modal-content">
+        <div class="modal-header border-bottom border-light">
+          <h5 class="modal-title" id="modalLogoutLabel" style="color:#b066ff;">Cerrar sesión</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:invert(1);"></button>
+        </div>
+        <div class="modal-body text-center">
+          ¿Seguro que quieres cerrar sesión?
+        </div>
+        <div class="modal-footer border-top border-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <a href="./Login.html">
+            <button type="button" class="btn btn-primary" 
+              style="background:linear-gradient(90deg, #8b5cf6, #b066ff); border:none;">Aceptar</button>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../Controllers/CryptoFunc.js"></script>  
+  <script src="../Controllers/Notes_Controller.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("zerolock_theme");
+      if (savedTheme === "light") {
+        document.body.classList.add("light-mode");
+      }
+    });
+  </script>
+
+  
+</body>
+</html>

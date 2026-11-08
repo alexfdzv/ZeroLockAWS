@@ -1,0 +1,114 @@
+// Post Users
+###
+POST http://localhost:3000/users HTTP/1.1
+content-type: application/json
+
+{
+    "nombre": "Cidolfus",
+    "correo": "Clive@gmail.com",
+    "pass": "pass456",
+    "UMK": {
+        "wrapped": "abc123xyz456", 
+        "salt": "a1b2c3d4e5",
+        "iteration": 100000
+    }
+}
+
+
+
+###
+GET http://localhost:3000/users?correo=UserPM@gmail.com
+
+
+### 
+GET http://localhost:3000/users/profile?id=6916229631899fb0a744a70e
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtYWlsIjoiSFdAZ21haWwuY29tIiwiaWF0IjoxNzYzNDc1OTU3LCJleHAiOjE3NjM0Nzk1NTd9.eqWlFGifi9vT0TnW2hda5zmBvaBo9SrZl4AF3N2OSHg
+
+###
+PUT http://localhost:3000/users HTTP/1.1
+content-type: application/json
+
+{
+    "id": "69173fff240d267fd48fc8fd",
+    "Is_free": false
+}
+
+### 
+DELETE http://localhost:3000/users HTTP/1.1
+content-type: application/json
+
+{
+    "id": "6914c5affbec2d78799980ff"
+}
+
+
+### PRUEBA CREACIÓN DE NOTAS
+POST http://localhost:3000/notes
+Content-Type: application/json
+
+{
+    "User_id": "69162cabac2765aca449249d", 
+    "titulo": "Nota de Clive", 
+    "contenido": "Esta es la nota de clive"
+}
+
+### OTRA PRUEBA PARA PODER CONSULTAR NOTAS DIFERENTES
+POST http://localhost:3000/notes
+Content-Type: application/json
+
+{
+    "User_id": "6916229631899fb0a744a70e", 
+    "titulo": "Mi ultima nota free", 
+    "contenido": "Esta es la segunda nota que hago, espero que funcione"
+}
+
+### OTRA PRUEBA PARA PODER CONSULTAR NOTAS DIFERENTES
+POST http://localhost:3000/notes
+Content-Type: application/json
+
+{
+    "User_id": "69173fff240d267fd48fc8fd", 
+    "titulo": "Prueba nota 6", 
+    "contenido": "Esta es la segunda nota que hago, espero que funcione"
+}
+
+### TODAS LAS NOTAS DE UN USUARIO (EL DE HAYLEY): 
+GET http://localhost:3000/notes?User_id=6916229631899fb0a744a70e 
+
+### PRUEBA CON OTRO USUARIO (CLIVE): 
+GET http://localhost:3000/notes?User_id=69162cabac2765aca449249d
+
+
+### UPDATE A UNA NOTA
+PUT http://localhost:3000/notes/691742d2468522fd4b5f1154
+Content-Type: application/json
+
+{
+  "titulo": "Título actualizado",
+  "contenido": "Contenido actualizado"
+}
+
+### DELETE - Eliminar nota
+DELETE http://localhost:3000/notes/691742d2468522fd4b5f1154
+
+### PRUEBA GET STEGO CON OTRO USUARIO (Barnabas): 
+GET http://localhost:3000/stego?User_id=6917a561323114da48c54853
+
+
+### UPDATE A UNA IMÁGEN
+PUT http://localhost:3000/stego/6919100b274fec07884cd1a9
+Content-Type: application/json
+
+{
+  "nombre": "Garuda.png",
+  "Descripción": "ODIN!"
+}
+
+### DELETE - Eliminar nota
+DELETE http://localhost:3000/stego/6919100b274fec07884cd1a9
+
+### PRUEBA EXTRACCIÓN DE DATA
+GET http://localhost:3000/stego/extract/691cbee9492504c491c76265
+
+

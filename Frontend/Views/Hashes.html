@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Hashes</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+        <!-- Bootstrap CSS v5.2.1 -->
+        <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+        crossorigin="anonymous"
+        /> 
+        <link rel="stylesheet" type="text/css" href="../Assets/Hashes.css"/>
+        <script src="https://kit.fontawesome.com/5e25872797.js" crossorigin="anonymous"></script>
+                <!-- Bcrypt support -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+    </head>
+
+    <body>
+
+    
+    <!-- ===== NAV BAR ===== -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="./Profile.html">
+                <img src="../Assets/Logo_ZeroLock.jpeg" alt="ZeroLock Logo" class="navbar-logo">
+                <span class="navbar-title">ZeroLock</span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+
+            <div class="collapse navbar-collapse" id="mynavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item me-3">
+                    <a class="nav-link active" href="./Passwords.html"><span class="glow-text">Contraseñas</span></a>
+                    </li>
+                    <li class="nav-item me-3">
+                    <a class="nav-link active" href="./Notes.html"><span class="glow-text">Notas</span></a>
+                    </li>
+                    <li class="nav-item me-3">
+                    <a class="nav-link active" href="./Stego.html"><span class="glow-text">Stego</span></a>
+                    </li>
+                    <li class="nav-item me-3">
+                    <a class="nav-link active" href="./Hashes.html"><span class="glow-text">Comparador de hashes</span></a>
+                    </li>
+                </ul>
+
+            <!-- Botón logout -->
+                <button type="button" class="btn navbar-logout-btn" data-bs-toggle="modal" data-bs-target="#modalLogout" title="Cerrar sesión">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+                </div>
+            </div>
+        </nav>
+            <!-- NAV BAR -->
+        <main>
+            
+<!-- 
+            <div class="container">
+                <div class="card">
+                    <div class="file-section">
+                    <button class="btn btn-hash">Subir archivo 1</button>
+                    <span class="file-name">No file selected</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="file-section">
+                    <button class="btn btn-hash">Subir archivo 2</button>
+                    <span class="file-name">Archivo.txt</span>
+                    </div>
+            </div> -->
+            <div class="container">
+
+    <!-- Upload Section 1 -->
+                <div class="card">
+                    <div class="file-section">
+                        <button class="btn btn-hash" onclick="selectFile(1)">Subir archivo 1</button>
+                        <span class="file-name" id="fileName1">No file selected</span>
+
+                        <input type="file" id="fileInput1" style="display:none" onchange="handleFile(1)">
+                    </div>
+                </div>
+
+                <!-- Upload Section 2 -->
+                <div class="card">
+                    <div class="file-section">
+                        <button class="btn btn-hash" onclick="selectFile(2)">Subir archivo 2</button>
+                        <span class="file-name" id="fileName2">No file selected</span>
+
+                        <input type="file" id="fileInput2" style="display:none" onchange="handleFile(2)">
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="container">
+                <!-- Format Section -->
+                <div class="card small" id="select-hashes">
+                    <span class="hash-text">Elige el formato del hash</span>
+                    <div class="btn-group" role="group" aria-label="Format selector">
+                        <input type="radio" class="btn-check" name="hashFormat" id="sha384" autocomplete="off" checked>
+                        <label class="btn btn-outline-light" for="sha384">SHA-384</label>
+
+                        <input type="radio" class="btn-check" name="hashFormat" id="sha1" autocomplete="off">
+                        <label class="btn btn-outline-light" for="sha1">SHA-1</label>
+
+                        <input type="radio" class="btn-check" name="hashFormat" id="sha256" autocomplete="off">
+                        <label class="btn btn-outline-light" for="sha256">SHA-256</label>
+
+                        <input type="radio" class="btn-check" name="hashFormat" id="sha512" autocomplete="off">
+                        <label class="btn btn-outline-light" for="sha512">SHA-512</label>
+
+                        <input type="radio" class="btn-check" name="hashFormat" id="bcrypt" autocomplete="off">
+                        <label class="btn btn-outline-light" for="bcrypt">bcrypt</label>
+                    </div>
+                </div>
+
+
+                <!-- Calculate Section -->
+                <div class="card large">
+                    <button class="btn big" onclick="calculateHashes()" id="master-btn">Calcular hashes</button>
+                </div>
+
+                <!-- Hashes en sí -->
+                 <div class="hash-placeholder-card">
+                     <div class="file-section">
+                     <div class="file-card" >
+                         <h3 id="hash-placeholder1">Archivo 1</h3>
+                         <div class="hash-placeholder" id="color1"><span id="hashOutput1"></span></div>
+                     </div>
+                     <div class="file-card" >
+                         <h3 id="hash-placeholder2">Archivo 2</h3>
+                         <div class="hash-placeholder" id="color2"><span id="hashOutput2"></span></div>
+                     </div>
+                     </div>
+                 </div>
+
+            </div>
+            </div>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+
+    
+             <!-- Modal Logout -->
+            <div class="modal fade" id="modalLogout" tabindex="-1" aria-labelledby="modalLogoutLabel" aria-hidden="true">
+                <div class="modal-dialog modal-sm" style="margin-top: 100px;">
+                <div class="modal-content">
+                    <div class="modal-header border-bottom border-light">
+                    <h5 class="modal-title" id="modalLogoutLabel" style="color:#b066ff;">Cerrar sesión</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:invert(1);"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                    ¿Seguro que quieres cerrar sesión?
+                    </div>
+                    <div class="modal-footer border-top border-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a href="./Login.html">
+                        <button type="button" class="btn btn-primary" 
+                        style="background:linear-gradient(90deg, #8b5cf6, #b066ff); border:none;">Aceptar</button>
+                    </a>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+        </main>
+            <!-- place footer here -->
+            <footer class="footer">
+                <div class="footer-content">
+                    <p>© 2025 ZeroLock. All rights reserved.</p>
+                    <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Contact</a>
+                    </div>
+                </div>
+            </footer>
+        <!-- Bootstrap JavaScript Libraries -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+            integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+            crossorigin="anonymous"
+        ></script>
+
+        <script>
+            // === Aplicar tema guardado al cargar ===
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedTheme = localStorage.getItem("theme") || "dark";
+            document.body.classList.toggle("light-mode", savedTheme === "light");
+        });
+        </script>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+            integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+            crossorigin="anonymous"
+        ></script>
+        <script src="../Controllers/Hashes_Controller.js"></script>
+
+    </body>
+</html>

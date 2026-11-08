@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Stego</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+
+        <!-- Bootstrap CSS v5.2.1 -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+        />
+        <link rel="stylesheet" href="../Assets/Stego.css">
+        <script src="https://kit.fontawesome.com/5e25872797.js" crossorigin="anonymous"></script>
+    </head>
+
+    <body>
+        <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="./Profile.html">
+                <img src="../Assets/Logo_ZeroLock.jpeg" alt="ZeroLock Logo" class="navbar-logo">
+                <span class="navbar-title">ZeroLock</span>
+            </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mynavbar">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item me-3">
+            <a class="nav-link active" href="./Passwords.html"><span class="glow-text">Contraseñas</span></a>
+          </li>
+          <li class="nav-item me-3">
+            <a class="nav-link active" href="./Notes.html"><span class="glow-text">Notas</span></a>
+          </li>
+          <li class="nav-item me-3">
+            <a class="nav-link active" href="./Stego.html"><span class="glow-text">Stego</span></a>
+          </li>
+          <li class="nav-item me-3">
+            <a class="nav-link active" href="./Hashes.html"><span class="glow-text">Comparador de hashes</span></a>
+          </li>
+        </ul>
+
+        <!-- Botón logout -->
+        <button type="button" class="btn navbar-logout-btn" data-bs-toggle="modal" data-bs-target="#modalLogout" title="Cerrar sesión">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+        </header>
+        <main>
+            <div class="card stego-section">
+              <div class="input-row">
+
+                  <!-- IMAGE BUTTON -->
+                  <button class="btn file-btn" onclick="selectStegoFile('image')">
+                      Seleccionar imagen
+                  </button>
+                  <span id="imageName" class="file-name">Sin archivo</span>
+
+                  <input type="file" id="imageInput"
+                        accept="image/png"
+                        style="display:none"
+                        onchange="handleStegoFile('image')">
+
+                  <!-- TEXT BUTTON -->
+                  <button class="btn file-btn" onclick="selectStegoFile('text')">
+                      Seleccionar texto
+                  </button>
+                  <span id="textName" class="file-name">Sin archivo</span>
+
+                  <input type="file" id="textInput"
+                        accept=".txt"
+                        style="display:none"
+                        onchange="handleStegoFile('text')">
+                  <div class="test"><span style="color: #8b5cf6;">Descripción</span><input type="text" id="description"></div>
+                  <!-- SEND BUTTON -->
+                  <button class="btn create-btn" onclick="sendStegoToBackend()">
+                      Crear nueva imagen
+                  </button>
+                  <button class="btn" data-bs-toggle="modal" data-bs-target="#info_stego">
+                      <i class="fa-solid fa-question"></i>
+                  </button>
+
+              </div>
+            </div>
+
+            <div class="card stego-list">
+            <h3 >Lista Stego imágenes <i class="fa-solid fa-image"></i></h3>
+            <div id="Header_lista">
+
+            </div>
+            <!-- <table class="stego-table">
+                <thead>
+                <tr>
+                    <th>Nombre de imagen</th>
+                    <th>Fecha de creación</th>
+                    <th>Descripción</th>
+                    <th>Extraer información</th>
+                    <th>Editar</th>
+                    <th>Eliminar</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>stego1.png</td>
+                    <td>2025-11-04</td>
+                    <td>Imagen de prueba con texto oculto</td>
+                    <td><button class="btn diamond" data-bs-toggle="modal" data-bs-target="#Modal_sacar_info"><i class="fa-solid fa-key"></i></button></td>
+                    <td><button class="btn diamond" data-bs-toggle="modal" data-bs-target="#Modal_editar"><i class="fa-solid fa-pencil"></i></button></td>
+                    <td><button class="btn diamond del" data-bs-toggle="modal" data-bs-target="#Modal_borrar"><i class="fa-solid fa-x"></i></button></td>
+                </tr>
+                <tr>
+                    <td>example.png</td>
+                    <td>2025-11-03</td>
+                    <td>Archivo con mensaje secreto</td>
+                    <td><button class="btn diamond" data-bs-toggle="modal" data-bs-target="#Modal_sacar_info"><i class="fa-solid fa-key"></i></button></td>
+                    <td><button class="btn diamond" data-bs-toggle="modal" data-bs-target="#Modal_editar"><i class="fa-solid fa-pencil"></i></button></td>
+                    <td><button class="btn diamond del" data-bs-toggle="modal" data-bs-target="#Modal_borrar"><i class="fa-solid fa-x"></i></button></td>
+                </tr>
+                </tbody>
+            </table> -->
+            </div>
+            <!-- Modal sacar info -->
+             <!-- The Modal -->
+                        <div class="modal" id="Modal_sacar_info">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+
+                                    <!-- Modal Header -->
+                                    <div class="modal-header">
+                                        <h4 class="modal-title">Extraer información</h4>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+
+                                    <!-- Modal body -->
+                                    <div class="modal-body">
+                                      <p>Datos extraídos: <span  id="Display_info"></span></p>
+                                      <!-- <div class="form-group">
+                                        <label for="passphrase">Passphrase</label>
+                                        <input type="password" class="form-control" id="passphrase">
+                                      </div> -->
+                                    </div>
+
+                                    <!-- Modal footer -->
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <a href="./Stego.html"><button type="button" class="btn btn-primary modal-btn-accept" data-bs-dismiss="modal">Aceptar</button></a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+            <!-- Modal borrar -->
+                        <div class="modal" id="Modal_borrar">
+                            <div class="modal-dialog modal-sm">
+                                <div class="modal-content">
+
+                                    <!-- Modal Header -->
+                                    <div class="modal-header">
+                                        <h4 class="modal-title">Borrar Stego imagen</h4>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+
+                                    <!-- Modal body -->
+                                    <div class="modal-body">
+                                        ¿Seguro que quieres borrar la imagen?
+                                    </div>
+
+                                    <!-- Modal footer -->
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <a href=""><button id="btn_borrar" type="button" class="btn btn-primary modal-btn-accept" data-bs-dismiss="modal">Aceptar</button></a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+            <!-- Modal Editar -->
+                        <div class="modal" id="Modal_editar">
+                            <div class="modal-dialog modal-sm">
+                                <div class="modal-content">
+
+                                    <!-- Modal Header -->
+                                    <div class="modal-header">
+                                        <h4 class="modal-title">Editar Stego imagen</h4>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+
+                                    <!-- Modal body -->
+                                    <div class="modal-body">
+                                        <form id="FormEdit">
+                                        <div class="form-group">
+                                          <label for="Nombre_img" class="col-form-label">Nombre</label>
+                                          <input type="text" class="form-control" id="Nombre_img" name="nombre">
+                                        </div>
+                                        <div class="form-group">
+                                          <label for="Descripción_img" class="col-form-label">Descripción</label>
+                                          <textarea id="Descripción_img" name="Descripción" rows="5" cols="31"></textarea><br>
+                                        </div>
+                                      </form>
+                                    </div>
+
+                                    <!-- Modal footer -->
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <a href=""><button id="Edit_btn" type="button" class="btn btn-primary modal-btn-accept" data-bs-dismiss="modal">Aceptar</button></a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+        <!-- Modal Logout -->
+  <div class="modal fade" id="modalLogout" tabindex="-1" aria-labelledby="modalLogoutLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm" style="margin-top: 100px;">
+      <div class="modal-content">
+        <div class="modal-header border-bottom border-light">
+          <h5 class="modal-title" id="modalLogoutLabel" style="color:#b066ff;">Cerrar sesión</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:invert(1);"></button>
+        </div>
+        <div class="modal-body text-center">
+          ¿Seguro que quieres cerrar sesión?
+        </div>
+        <div class="modal-footer border-top border-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <a href="./Login.html">
+            <button type="button" class="btn btn-primary" 
+              style="background:linear-gradient(90deg, #8b5cf6, #b066ff); border:none;">Aceptar</button>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal stego -->
+<div class="modal" id="info_stego">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">¿Qué es la Steganografía?</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="modal-body">
+        La esteganografía es la técnica de ocultar información secreta dentro de otros archivos comunes como imágenes, audio o video para que su existencia no sea detectada. A diferencia del cifrado, que solo oculta el contenido de un mensaje, la esteganografía oculta el hecho de que existe un mensaje, haciéndolo parecer inofensivo
+      </div>
+
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+        </main>
+            <!-- <footer class="footer">
+                <div class="footer-content">
+                    <p>© 2025 ZeroLock. All rights reserved.</p>
+                    <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Contact</a>
+                    </div>
+                </div> -->
+            </footer>
+        <!-- Bootstrap JavaScript Libraries -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+            integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+            crossorigin="anonymous"
+        ></script>
+        <script>
+          // === Aplicar tema guardado al cargar ===
+          document.addEventListener("DOMContentLoaded", () => {
+              const savedTheme = localStorage.getItem("theme") || "dark";
+              document.body.classList.toggle("light-mode", savedTheme === "light");
+          });
+        </script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+            integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+            crossorigin="anonymous"
+        ></script>
+        <script src="../Controllers/CryptoFunc.js"></script>
+        <script src="../Controllers/Stego_Controller.js"></script>
+    </body>
+</html>

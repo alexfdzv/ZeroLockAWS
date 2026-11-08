@@ -1,0 +1,544 @@
+/* General */
+/* ===== RESET BODY ===== */
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: #1a1a1a;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ===== NAVBAR UNIFICADO ===== */
+.navbar {
+  background-color: #14121a !important;
+  border-bottom: 1px solid #8b5cf6;
+  box-shadow: 0 0 10px rgba(176, 102, 255, 0.2);
+  padding: 0.5rem 0 !important;
+  margin: 0 !important;
+  height: 68px;
+  max-height: 68px;
+  min-height: 68px;
+}
+
+.navbar .container-fluid {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Brand */
+.navbar-brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 40px;
+}
+
+.navbar-logo {
+  height: 40px !important;
+  width: 40px !important;
+  min-height: 40px !important;
+  min-width: 40px !important;
+  max-height: 40px !important;
+  max-width: 40px !important;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.navbar-title {
+  color: #b066ff;
+  font-weight: 600;
+  text-shadow: 0 0 8px #b066ff;
+  font-size: 1.1rem;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+}
+
+/* Nav items */
+.navbar-nav {
+  align-items: center;
+}
+
+.navbar-nav .nav-item {
+  display: flex;
+  align-items: center;
+  height: 40px;
+}
+
+.navbar-nav .nav-link {
+  font-size: 0.95rem;
+  padding: 0.4rem 0.8rem !important;
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+/* Efectos hover */
+.glow-text {
+  color: white;
+  transition: all 0.4s ease;
+}
+
+.glow-text:hover {
+  background: linear-gradient(90deg, #a855f7, #8b5cf6, #c084fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.navbar .nav-link {
+  position: relative;
+  overflow: hidden;
+}
+
+.navbar .nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: #66ffb3;
+  transition: width 0.3s ease;
+}
+
+.navbar .nav-link:hover::after {
+  width: 100%;
+}
+
+/* Botón logout */
+.navbar-logout-btn {
+  padding: 0.4rem 0.8rem;
+  background: transparent;
+  border: none;
+}
+
+.navbar-logout-btn i {
+  color: azure;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.navbar-logout-btn:hover i {
+  transform: scale(1.15);
+  text-shadow: 0 0 8px #8b5cf6;
+}
+
+.card {
+  align-items: flex-start;
+  background-color: #1a1a1a;
+  margin-top: 12px;
+  padding-top: 8px;
+  border: 1px solid #8b5cf6;
+}
+
+.file-section {
+  display: flex;
+  align-items: center;   
+  gap: 15px;            
+  color: white;
+  padding: 10px;
+  margin-top: -6px; 
+}
+
+.btn-hash {
+  background-color: #8b5cf6;
+}
+
+.btn-group {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;                   
+  gap: 10px;                     
+  padding: 10px;                 
+  flex-wrap: wrap;               
+}
+
+.format-group .btn {
+  flex: 1;                        
+  text-align:justify;
+  border-radius: 25px;
+  border: 1px solid #8b5cf6;
+  color: rgb(10, 244, 228);
+  transition: all 0.2s ease;
+}
+
+.format-group .btn:hover {
+  background-color: #8b5cf6;
+  box-shadow: 0 0 8px #8b5cf6;
+}
+
+.btn-check:checked + .btn {
+  background-color: #8b5cf6;
+  box-shadow: 0 0 8px #8b5cf6;
+  color: white;
+  border-color: #8b5cf6;
+}
+
+.card.small {
+  background-color: #1a1a1a;
+  padding: 15px;
+  margin-top: 10px;
+  border-radius: 10px;
+}
+
+.hash-text {
+  color: white;
+  font-size: large;
+  margin-left: 10px;
+}
+
+.card.large {
+  background-color: #1a1a1a;
+  border-color: #1a1a1a;
+  text-align: center;    
+  padding: 30px 0;
+  margin-top: 20px;
+  border-radius: 12px;
+}
+
+/* Main action button */
+.btn.big {
+  background: linear-gradient(90deg, #8b5cf6, #b066ff);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 14px 40px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 0 15px rgba(176, 102, 255, 0.6);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Hover effect */
+.btn.big:hover {
+  background: linear-gradient(90deg, #b066ff, #8b5cf6);
+  box-shadow: 0 0 25px rgba(176, 102, 255, 0.9);
+  transform: scale(1.05);
+}
+
+/* Click feedback */
+.btn.big:active {
+  transform: scale(0.97);
+  box-shadow: 0 0 10px rgba(176, 102, 255, 0.6);
+}
+
+.hash-section {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  margin-top: 30px;
+}
+
+.hash-card {
+  background-color: #2e2e2e;
+  border-radius: 16px;
+  padding: 20px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+.hash-card h3 {
+  color: #fff;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.hash-placeholder {
+  background-color: #1f1f1f;
+  border: 2px dashed #8b5cf6;
+  border-radius: 10px;
+  padding: 20px;
+  color: #ccc;
+  font-family: monospace;
+  font-size: 0.95rem;
+  overflow-wrap: break-word;
+  min-height: 50px;
+  transition: all 0.3s ease;
+}
+
+.hash-placeholder:hover {
+  background-color: rgba(139, 92, 246, 0.1);
+  color: #fff;
+}
+
+.hash-placeholder-card {
+  display: flex;
+  align-items: center; 
+  gap: 15px;             
+  color: white;
+  padding: 10px;
+  margin-top: -6px; 
+}
+
+
+/* Footer */
+.footer {
+  margin-top: 40px;
+  padding: 20px 0;
+  background-color: #14121a;
+  border-top: 1px solid #b066ff;
+  color: #bbb;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+}
+
+.footer a {
+  color: #b066ff;
+  text-decoration: none;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.footer a:hover {
+  color: #fff;
+  text-shadow: 0 0 8px #b066ff;
+}
+
+/* ===== MODAL DARK THEME (Hashes) ===== */
+.modal-content {
+  background-color: #1e1e1e !important;
+  color: #fff !important;
+  border: 1px solid #8b5cf6 !important;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  border-radius: 12px;
+}
+
+.modal-header,
+.modal-footer {
+  border-color: #8b5cf6 !important;
+}
+
+.modal-title {
+  color: #b066ff !important;
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(176, 102, 255, 0.6);
+}
+
+.modal-body {
+  color: #ddd !important;
+  font-size: 1rem;
+}
+
+/* Botón cerrar visible en dark */
+.btn-close {
+  filter: invert(1);
+  opacity: 0.9;
+}
+
+/* Inputs en dark */
+.modal-content .form-control {
+  background-color: #2a2a2a;
+  border: 1px solid #8b5cf6;
+  color: #fff;
+}
+.modal-content .form-control:focus {
+  border-color: #b066ff;
+  box-shadow: 0 0 10px rgba(176, 102, 255, 0.5);
+}
+
+/* Botones footer */
+.modal-footer .btn-secondary {
+  background-color: #555;
+  border: none;
+  transition: all 0.3s ease;
+}
+.modal-footer .btn-secondary:hover {
+  background-color: #777;
+  box-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+.modal-footer .btn-primary {
+  background: linear-gradient(90deg, #8b5cf6, #b066ff);
+  border: none;
+  transition: all 0.3s ease;
+}
+.modal-footer .btn-primary:hover {
+  box-shadow: 0 0 15px rgba(176,102,255,0.8);
+  transform: scale(1.03);
+}
+
+/* Overlay un poco más oscuro (opcional) */
+.modal-backdrop.show {
+  opacity: .6;
+  background: #000;
+}
+
+/* Posición más alta como en Profile (opcional) */
+#modalLogout .modal-dialog {
+  margin-top: 100px;
+}
+
+.hash-placeholder {
+  max-width: 100%;
+  word-break: break-all;   /* forces long strings to wrap */
+}
+
+/* ===============================
+   🌤️ ZEROLOCK — LIGHT MODE
+   =============================== */
+
+body.light-mode {
+  background-color: #f2f2f5;
+  color: #111;
+}
+
+/* NAVBAR */
+body.light-mode .navbar {
+  background-color: white !important;
+  border-bottom: 1px solid #b066ff;
+}
+body.light-mode .navbar-title {
+  color: #7a2ef9;
+  text-shadow: none;
+}
+
+/* Logout */
+body.light-mode .navbar-logout-btn i {
+  color: #6a32c9 !important;
+}
+body.light-mode .navbar-logout-btn:hover i {
+  color: #3a0fa5 !important;
+}
+
+/* ===== HASHES LIGHT ===== */
+body.light-mode .card,
+body.light-mode .card.small,
+body.light-mode .card.large {
+  background-color: white !important;
+  border-color: #c6b8ff !important;
+  color: #111 !important;
+}
+
+body.light-mode .hash-card {
+  background-color: white !important;
+  border: 1px solid #cec3ff !important;
+  color: #111;
+  box-shadow: 0 0 10px rgba(176,102,255,0.15);
+}
+
+body.light-mode .hash-placeholder {
+  background-color: #ffffff !important;
+  border: 2px dashed #cbb9ff !important;
+  color: #333 !important;
+}
+
+body.light-mode .file-section {
+  color: #111 !important;
+}
+
+/* Botones formatos */
+body.light-mode .format-group .btn {
+  color: #6a32c9 !important;
+  border-color: #cbb9ff !important;
+}
+body.light-mode .format-group .btn:hover {
+  background-color: #e9ddff !important;
+}
+
+body.light-mode .btn-check:checked + .btn {
+  background-color: #c6b3ff !important;
+  color: #fff !important;
+}
+
+/* Botón principal */
+body.light-mode .btn.big {
+  background: linear-gradient(90deg, #7a2ef9, #b066ff);
+  box-shadow: 0 0 15px rgba(176,102,255,0.4);
+}
+
+/* MODAL LIGHT */
+body.light-mode .modal-content {
+  background-color: #f5f5f8 !important;
+  border: 1px solid #c9c9c9 !important;
+  color: #222 !important;
+}
+body.light-mode .modal-title {
+  color: #6a32c9 !important;
+}
+body.light-mode .modal-content .form-control {
+  background-color: white !important;
+  color: #222 !important;
+  border: 1px solid #aaa !important;
+}
+
+/* FOOTER */
+body.light-mode .footer {
+  background-color: #eaeaf0;
+  color: #333;
+  border-top: 1px solid #b066ff;
+}
+body.light-mode .footer a {
+  color: #7a2ef9;
+}
+body.light-mode .footer a:hover {
+  color: #5a1adf;
+}
+
+body.light-mode,
+body.light-mode * {
+    color: #111 !important;     /* Texto negro */
+}
+
+/* Restaurar colores donde sí queremos color especial */
+body.light-mode .navbar-title {
+    color: #7a2ef9 !important;
+}
+
+body.light-mode .note-title,
+body.light-mode h3,
+body.light-mode legend {
+    color: #6a0dad !important;
+}
+
+/* ===== BOTÓN LOGOUT ===== */
+body.light-mode .navbar-logout-btn i {
+    color: #6a32c9 !important;
+}
+body.light-mode .navbar-logout-btn:hover i {
+    color: #3a0fa5 !important;
+}
+
+/* ===== FIX PARA LOS BOTONES DE FORMATOS (SHA-1, SHA-256, bcrypt...) ===== */
+body.light-mode .format-group .btn {
+    background-color: #ffffff !important;
+    border: 1px solid #c9b4ff !important;
+    color: #222 !important;
+}
+
+body.light-mode .format-group .btn:hover {
+    background-color: #eee6ff !important;
+    color: #000 !important;
+}
+
+body.light-mode .btn-check:checked + .btn {
+    background-color: #c7b4ff !important;
+    color: #000 !important;
+    box-shadow: 0 0 10px rgba(176, 102, 255, 0.5);
+}
+
+/* ===== FIX PARA PLACEHOLDERS (hash) ===== */
+body.light-mode .hash-placeholder {
+    background-color: #ffffff !important;
+    border: 1px dashed #c9b4ff !important;
+    color: #111 !important;
+}
