@@ -5,6 +5,11 @@ const multer = require('multer');
 const path = require('path');
 const User = require('../Models/User');
 const storage = require('../storage');
+const verifyToken = require('./authMiddleware');
+const { isSelf, forbidden } = require('./authMiddleware');
+
+// Todas las rutas requieren sesión
+router.use(verifyToken);
 
 // La foto se recibe en memoria y se guarda en S3 (ver storage.js)
 const upload = multer({
@@ -12,8 +17,8 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-// Ruta pública de la foto de un usuario (la sirve el backend leyendo de S3,
-// porque el bucket es privado). "v" evita que el navegador muestre una foto vieja.
+// Ruta de la foto de un usuario (la sirve el backend leyendo de S3, porque el
+// bucket es privado). "v" evita que el navegador muestre una foto vieja.
 function photoUrl(userId, key) {
     return `/api/profile/photo?user_id=${userId}&v=${encodeURIComponent(path.basename(key))}`;
 }
@@ -30,6 +35,9 @@ router.post('/upload', upload.single('photo'), async (req, res) => {
 
         if (!userId) {
             return res.status(400).json({ error: "No se proporcionó user_id" });
+        }
+        if (!isSelf(req, userId)) {
+            return forbidden(res);
         }
 
         if (!req.file) {
@@ -74,6 +82,9 @@ router.get('/image', async (req, res) => {
         if (!userId) {
             return res.status(400).json({ error: "No se proporcionó user_id" });
         }
+        if (!isSelf(req, userId)) {
+            return forbidden(res);
+        }
 
         const user = await User.findById(userId);
 
@@ -98,6 +109,9 @@ router.get('/photo', async (req, res) => {
         const userId = req.query.user_id;
         if (!userId) {
             return res.status(400).json({ error: "No se proporcionó user_id" });
+        }
+        if (!isSelf(req, userId)) {
+            return forbidden(res);
         }
 
         const user = await User.findById(userId);

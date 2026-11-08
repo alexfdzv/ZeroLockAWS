@@ -1,4 +1,4 @@
-const express = require('express'); 
+const express = require('express');
 const routerUser = express.Router();
 const User = require('../Models/User');
 const Notes = require('../Models/Notes');
@@ -8,311 +8,188 @@ const Card = require('../Models/Cards');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const verifyToken = require('./authMiddleware');
-const Cards = require('../Models/Cards');
-//const mongoose = require('mongoose')
+const { isSelf, forbidden } = require('./authMiddleware');
+const storage = require('../storage');
+const { jwtSecret } = require('../config');
 
-// === CREATE === 
-routerUser.post('/', (req, res) => {
-    console.log("Guardando usuario...");
-    // Información que va a tener nuestro nuevo registro
-    if (req.body.pass != req.body.confirm_pass){
-        res.status(400).send("Passwords missmatch!");
-    }else{
-    let hash = bcrypt.hashSync(req.body.pass, 2);
-    console.log("Contraseña cifrada: ", hash);
-    let newUser = {
-        nombre: req.body.nombre,
-        correo: req.body.correo,
-        pass: hash, 
-        UMK: req.body.UMK
-    };
-    // A partir de la información y el modelo, hacemos un usuario
-    let user = User(newUser);
+// Costo de bcrypt (10 es el valor recomendado por la librería)
+const BCRYPT_ROUNDS = 10;
 
+// Quita los datos sensibles antes de responder
+function publicUser(doc) {
+    const user = doc.toObject();
+    delete user.pass;
+    delete user.UMK;
+    return user;
+}
 
-    // Guardamos el usuario en la BD (OJO, es asíncrono)
-    user.save().then((doc) => {
-        console.log("Usuario creado: " + doc);
-        res.json({
-            message: "Usario creado exitosamente", 
-            user: doc
+// === CREATE (registro) ===
+routerUser.post('/', async (req, res) => {
+    try {
+        const { nombre, correo, pass, confirm_pass, UMK } = req.body;
+
+        if (!nombre || !correo || !pass || !UMK) {
+            return res.status(400).json({ error: "Faltan datos requeridos" });
+        }
+        if (pass !== confirm_pass) {
+            return res.status(400).json({ error: "Las contraseñas no coinciden" });
+        }
+
+        const hash = await bcrypt.hash(pass, BCRYPT_ROUNDS);
+        const user = await User.create({ nombre, correo, pass: hash, UMK });
+
+        res.status(201).json({
+            message: "Usuario creado exitosamente",
+            user: publicUser(user)
         });
-    });
+    } catch (err) {
+        if (err.code === 11000) {
+            return res.status(409).json({ error: "Ya existe una cuenta con ese correo" });
+        }
+        console.error("Error al crear usuario:", err.message);
+        res.status(500).json({ error: "Error al crear usuario" });
     }
 });
 
-// === READ ===
+// === READ (perfil del usuario autenticado) ===
+routerUser.get('/profile', verifyToken, async (req, res) => {
+    try {
+        const userId = req.query.id;
+        if (!userId) {
+            return res.status(400).json({ message: "ID de usuario requerido." });
+        }
+        if (!isSelf(req, userId)) {
+            return forbidden(res);
+        }
 
-routerUser.get('/profile', verifyToken, (req, res) => {
-    // 1. Identificar al usuario
-    // Asumimos que el frontend enviará el ID en el query, por ejemplo: /api/users/profile?id=<userId>
-    const userId = req.query.id; 
-    
-    if (!userId) {
-        return res.status(400).json({ message: "ID de usuario requerido." });
+        const doc = await User.findById(userId).select('-pass -UMK');
+        if (!doc) {
+            return res.status(404).json({ message: "Usuario no encontrado." });
+        }
+        res.json(doc);
+    } catch (err) {
+        console.error("Error al consultar el perfil:", err.message);
+        res.status(500).json({ message: "Error al consultar el perfil." });
     }
-
-    console.log(`Consultando perfil para ID: ${userId}`);
-
-    // 2. Buscar al usuario por ID
-    User.findById(userId)
-        .select('-pass -UMK') // Evita enviar datos sensibles como la contraseña y UMK
-        .then(function (doc) {
-            if (!doc) {
-                return res.status(404).json({ message: "Usuario no encontrado." });
-            }
-            res.send(doc); // Devuelve el objeto de usuario (incluye nombre, correo, contadores, etc.)
-            console.log(doc);
-        })
-        .catch((err) => {
-            console.error(err);
-            res.status(500).send("Error al consultar el perfil.");
-        });
 });
 
-routerUser.get('/', (req, res) => {
-    console.log("Consultando usuarios...");
-    let mail = req.query.correo;
-    console.log(mail);
-    User.find({
-        correo: {$regex: mail},
-    }).then(function (docs) {
-        res.send(docs);
-        console.log(docs);
-    }).catch((err) => console.log(err));
-});
-
-// === UPDATE ===
-// routerUser.put('/', verifyToken, async (req, res) => {
-//     console.log("Actualizando información...");
-//     let user_name = req.body.nombre;
-//     let user_id = req.body.id;
-//     console.log(user_id);
-//     let user_pass = req.body.pass;
-//     let n_pass = req.body.n_pass;
-//     let n_images = req.body.n_images;
-//     let n_cards = req.body.n_cards;
-//     let n_notes = req.body.n_notes;
-//     let UMK_wp = req.body.UMK?.wrapped;
-//     let object_to_update = {};
-//     let flag_updated_nombre = false;
-
-//      if (user_name !== undefined) {
-//         object_to_update.nombre = user_name;
-//         flag_updated_nombre = true;
-//     }
-
-//     if (user_pass !== undefined){
-//         object_to_update.pass = user_pass;
-//         flag_updated_nombre = true;
-//     }
-
-//     if (n_pass !== undefined) {
-//         object_to_update.Numero_pass = n_pass; 
-//         flag_updated_nombre = true;
-//     }
-
-//     if (n_images !== undefined) {
-//         object_to_update.Numero_img = n_images;
-//         flag_updated_nombre = true;
-//     }
-
-//     if (n_cards !== undefined) {
-//         object_to_update.Numero_tarjetas = n_cards;
-//         flag_updated_nombre = true;
-//     }
-
-//     if (n_notes !== undefined) {
-//         object_to_update.Numero_notes = n_notes;
-//         flag_updated_nombre = true;
-//     }
-
-//     if (UMK_wp !== undefined) {
-//         // Solo actualizamos el wrapped dentro de UMK
-//         object_to_update["UMK.wrapped"] = UMK_wp;
-//         flag_updated_nombre = true;
-//     }
-
-//     // ==== Fin de IFs ====
-
-//     if (flag_updated_nombre) {
-//         console.log(object_to_update);
-//         console.table(object_to_update);
-//         User.findByIdAndUpdate(user_id, object_to_update, { new: true })
-//             .then((doc) => {
-//                 console.log("Usuario actualizado");
-//                 console.log(doc);
-//                 res.send(doc);
-//             })
-//             .catch((err) => {
-//                 console.log("Error al actualizar:", err);
-//                 res.status(500).send("Error al actualizar usuario");
-//             });
-//     } else {
-//         res.send("No se ha actualizado");
-//     }
-// });
-
+// === UPDATE (solo el propio usuario) ===
 routerUser.put('/', verifyToken, async (req, res) => {
-    console.log("Actualizando información...");
-    let user_id = req.body.id;
+    try {
+        const user_id = req.body.id;
+        if (!user_id) {
+            return res.status(400).json({ error: "ID requerido" });
+        }
+        if (!isSelf(req, user_id)) {
+            return forbidden(res);
+        }
 
-    if (!user_id) {
-        return res.status(400).json({ error: "ID requerido" });
+        const object_to_update = {};
+
+        if (req.body.nombre !== undefined) {
+            object_to_update.nombre = req.body.nombre;
+        }
+        if (req.body.pass !== undefined) {
+            object_to_update.pass = await bcrypt.hash(req.body.pass, BCRYPT_ROUNDS);
+        }
+        if (req.body.n_pass !== undefined) {
+            object_to_update.Numero_pass = req.body.n_pass;
+        }
+        if (req.body.n_images !== undefined) {
+            object_to_update.Numero_img = req.body.n_images;
+        }
+        if (req.body.n_cards !== undefined) {
+            object_to_update.Numero_tarjetas = req.body.n_cards;
+        }
+        if (req.body.n_notes !== undefined) {
+            object_to_update.Numero_notes = req.body.n_notes;
+        }
+        // Llave maestra re-envuelta (por ejemplo, al cambiar la contraseña)
+        if (req.body.UMK !== undefined) {
+            object_to_update["UMK.wrapped"] = req.body.UMK.wrapped;
+            object_to_update["UMK.salt"] = req.body.UMK.salt;
+            object_to_update["UMK.iteration"] = req.body.UMK.iteration;
+        }
+
+        if (Object.keys(object_to_update).length === 0) {
+            return res.status(400).json({ error: "No hay cambios para actualizar" });
+        }
+
+        const doc = await User.findByIdAndUpdate(user_id, object_to_update, { new: true });
+        if (!doc) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+        res.json(publicUser(doc));
+    } catch (err) {
+        console.error("Error al actualizar usuario:", err.message);
+        res.status(500).json({ error: "Error al actualizar usuario" });
     }
-
-    let object_to_update = {};
-    let updated = false;
-
-    // --- Actualizar nombre ---
-    if (req.body.nombre !== undefined) {
-        object_to_update.nombre = req.body.nombre;
-        updated = true;
-    }
-
-    // --- ACTUALIZAR PASSWORD (ya viene hasheada desde FRONT) ---
-    if (req.body.pass !== undefined) {
-        const newHash = bcrypt.hashSync(req.body.pass, 10);
-        object_to_update.pass = newHash;
-        updated = true;
-    }
-
-    // --- updates contadores ---
-    if (req.body.n_pass !== undefined) {
-        object_to_update.Numero_pass = req.body.n_pass;
-        updated = true;
-    }
-
-    if (req.body.n_images !== undefined) {
-        object_to_update.Numero_img = req.body.n_images;
-        updated = true;
-    }
-
-    if (req.body.n_cards !== undefined) {
-        object_to_update.Numero_tarjetas = req.body.n_cards;
-        updated = true;
-    }
-
-    if (req.body.n_notes !== undefined) {
-        object_to_update.Numero_notes = req.body.n_notes;
-        updated = true;
-    }
-
-    // --- ACTUALIZAR UMK COMPLETA ---
-    if (req.body.UMK !== undefined) {
-        object_to_update["UMK.wrapped"] = req.body.UMK.wrapped;
-        object_to_update["UMK.salt"] = req.body.UMK.salt;
-        object_to_update["UMK.iteration"] = req.body.UMK.iteration;
-        updated = true;
-    }
-
-    if (!updated) {
-        return res.status(400).json({ error: "No hay cambios para actualizar" });
-    }
-
-    User.findByIdAndUpdate(user_id, object_to_update, { new: true })
-        .then(doc => {
-            console.log("Usuario actualizado:");
-            console.log(doc);
-            res.json(doc);
-        })
-        .catch(err => {
-            console.log("Error al actualizar:", err);
-            res.status(500).json({ error: "Error al actualizar usuario" });
-        });
 });
 
-// === DELETE === 
-// routerUser.delete('/', (req, res) => {
-//     let id = req.body.id;
-
-//     User.findByIdAndDelete(id).then((doc) => {
-//         console.log("Usuario eliminado");
-//         res.send(doc);
-//     }).catch((err) => console.log(err));
-// });
-
-
-// === DELETE DEL USUARIO COMPLETO === 
-routerUser.delete('/:id', async (req, res) => {
+// === DELETE DEL USUARIO COMPLETO (solo el propio usuario) ===
+routerUser.delete('/:id', verifyToken, async (req, res) => {
     const id = req.params.id;
-    console.log("=== INICIO DELETE USER ===");
-    console.log("ID recibido:", id);
+    if (!isSelf(req, id)) {
+        return forbidden(res);
+    }
 
     try {
-        console.log("1. Buscando usuario...");
         const user = await User.findById(id);
-        console.log("Usuario encontrado:", user ? "SÍ" : "NO");
-        
         if (!user) {
             return res.status(404).json({ error: "Usuario no encontrado" });
         }
 
-        console.log("2. Eliminando notas...");
+        // Borrar los archivos del usuario en S3 (imágenes y foto de perfil)
+        const images = await Image.find({ user_id: id });
+        const keys = images.map((img) => img.fullname);
+        if (user.profileImg && user.profileImg.startsWith('profile/')) {
+            keys.push(user.profileImg);
+        }
+        await Promise.all(keys.map((key) =>
+            storage.deleteFile(key).catch((err) =>
+                console.error("No se pudo borrar el archivo", key, err.message))));
+
+        // Borrar sus datos (cada modelo usa su propio nombre de campo)
         await Notes.deleteMany({ User_id: id });
-        
-        console.log("3. Eliminando passwords...");
         await Password.deleteMany({ User_id: id });
-        
-        console.log("4. Eliminando stego...");
-        await Image.deleteMany({ User_id: id });
-
-        console.log("5. Eliminando Cards...");
         await Card.deleteMany({ User_id: id });
-        
-        console.log("6. Eliminando usuario...");
+        await Image.deleteMany({ user_id: id });
         await User.findByIdAndDelete(id);
-        
-        console.log("✓ Todo eliminado correctamente");
-        res.status(200).json({ message: "Usuario eliminado correctamente" });
 
+        res.status(200).json({ message: "Usuario eliminado correctamente" });
     } catch (err) {
-        console.error("❌ ERROR:", err);
-        res.status(500).json({
-            error: "Error interno al eliminar usuario",
-            details: err.message
-        });
+        console.error("Error al eliminar usuario:", err.message);
+        res.status(500).json({ error: "Error interno al eliminar usuario" });
     }
 });
 
-// === LOGIN === 
-routerUser.post('/login', (req, res) => {
-    let mail = req.body.correo;
-    let pass = req.body.pass;
-    console.log("Correo: ", mail);
-    User.find({
-        correo: {$regex: mail},
-    }).then(function (docs) {
-        let correct_pass = bcrypt.compareSync(pass, docs[0].pass);
-        console.log("Pass correcto: ", correct_pass);
-        if(correct_pass){
-            //res.send(docs);
-            console.log(docs);
-            const secret_key = require('../config').jwtSecret;
-            const token = jwt.sign({mail}, secret_key, {expiresIn: '1h'});
-            console.log("UMK: ", docs[0].UMK);
-            console.log("Token: ", token);
-            res.json({
-                token: token, 
-                UMK: docs[0].UMK,
-                user_id: docs[0]._id
-            });
-        }else{
-            res.status(401).send("Error al inciar sesión");
+// === LOGIN ===
+routerUser.post('/login', async (req, res) => {
+    try {
+        const { correo, pass } = req.body;
+        if (typeof correo !== 'string' || typeof pass !== 'string') {
+            return res.status(400).json({ error: "Correo y contraseña requeridos" });
         }
-    }).catch((err) => console.log(err));
 
+        // Búsqueda exacta del correo (antes era una expresión regular, lo que
+        // permitía que un correo coincidiera con otro que lo contenía)
+        const user = await User.findOne({ correo: correo });
+        const correct_pass = user ? await bcrypt.compare(pass, user.pass) : false;
 
-})
+        if (!correct_pass) {
+            return res.status(401).json({ error: "Correo y/o contraseña incorrectos" });
+        }
 
-routerUser.put('/updatePlan', (req, res) => {
-    User.findByIdAndUpdate(
-        req.body.id,
-        { Is_free: false },
-        { new: true }
-    )
-    .then(user => res.json(user))
-    .catch(err => res.status(500).json(err));
+        const token = jwt.sign({ mail: user.correo, id: String(user._id) }, jwtSecret, { expiresIn: '1h' });
+        res.json({
+            token: token,
+            UMK: user.UMK,
+            user_id: user._id
+        });
+    } catch (err) {
+        console.error("Error en el login:", err.message);
+        res.status(500).json({ error: "Error al iniciar sesión" });
+    }
 });
 
 module.exports = routerUser;

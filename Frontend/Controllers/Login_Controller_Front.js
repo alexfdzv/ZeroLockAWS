@@ -24,11 +24,8 @@ function bufferTobase64(buffer){
 
 async function login(){
     event.preventDefault();
-    console.log("Login");
     let data = new FormData(event.target);
     let json = Object.fromEntries(data.entries());
-    console.log("Correo: ", json.correo);
-    console.log("Password: ", json.pass);
     fetch('/api/login', {
         method: 'POST', 
         headers: {
@@ -37,13 +34,13 @@ async function login(){
         body: JSON.stringify(Object.fromEntries(data.entries()))
     })
     .then(response => {
-        if(!response.ok) alert("Correo y/o contraseña incorrectos");
+        if(!response.ok) {
+            alert("Correo y/o contraseña incorrectos");
+            throw new Error("Credenciales incorrectas");
+        }
         return response.json();
     })
     .then(async data => {
-        console.log("Estamos dentro");
-        console.log("Token: ", data.token);
-        console.log("User ID: ", data._id);
         localStorage.setItem('token', data.token);
         sessionStorage.setItem('UMK', data.UMK.wrapped);
         localStorage.setItem('user_id', data.user_id);
@@ -84,13 +81,6 @@ async function login(){
             true,                               // extractable
             ["encrypt", "decrypt"]              // usages de la key resultante
         );
-
-         const exported = await crypto.subtle.exportKey("raw", masterKey);
-        console.log("MasterKey (hex):", 
-        Array.from(new Uint8Array(exported))
-            .map(b => b.toString(16).padStart(2, '0'))
-            .join('')
-        );
         /////////////////////
         // window.nomirar = {
         //     KEK: KEK
@@ -98,8 +88,6 @@ async function login(){
         sessionStorage.setItem("KEK", KEK);
         const KEKraw = await crypto.subtle.exportKey("raw", KEK);
         sessionStorage.setItem("KEK_raw", bufferTobase64(KEKraw));
-        console.log(KEKraw);
-        debugger;
         window.location.href = local_url + '/Profile.html';
     })
     .catch(err => {
@@ -122,18 +110,15 @@ function arraytobuffer64(buffer) {
 
 async function register(event){
     event.preventDefault();
-    console.log("Entrando a register()");
 
     let data = new FormData(event.target);
     let json = Object.fromEntries(data.entries());
     
     
-    console.log("Contraseña =: ",json.pass);
     // CREACIÓN DE LA UMK 
     // Derivar UMK con PBKDF2
     const saltBuffer = crypto.getRandomValues(new Uint8Array(16));
     const salt64 = btoa(String.fromCharCode(...saltBuffer));
-    console.log("Salt: ", salt64);
     
     // 2. Derivar KEK (Key Encryption Key) desde la contraseña
     const encoder = new TextEncoder();
@@ -166,12 +151,6 @@ async function register(event){
     );
     
     // Debug masterkey
-    const exported = await crypto.subtle.exportKey("raw", masterKey);
-    console.log("MasterKey (hex):", 
-    Array.from(new Uint8Array(exported))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('')
-    );
     // 4. Wrap (cifrar) la Master Key con la KEK
     const wrappedMK = await crypto.subtle.wrapKey(
         "raw", 
@@ -191,19 +170,18 @@ async function register(event){
 
 
 
-    console.log("JSON FINAL: ", json);
-    console.log("Wrapped MK (bytes): ", wrappedMK.byteLength);
     
-    console.log("JSON FINAL: ", json);
-    console.log("Wrapped", wrappedMK);
-    console.log("Salt: ", salt64);
     fetch(local_url + '/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(json)
     })
-    .then(resp => resp.json())
-    .then(result => {
+    .then(async resp => {
+        const result = await resp.json().catch(() => ({}));
+        if (!resp.ok) {
+            alert(result.error || "No se pudo registrar el usuario");
+            return;
+        }
         alert("Usuario registrado");
         toggleForms();
     })

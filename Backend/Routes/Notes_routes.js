@@ -3,266 +3,140 @@ const routerNotes = express.Router();
 const Notes = require('../Models/Notes');
 const User = require('../Models/User');
 const verifyToken = require('./authMiddleware');
+const { isSelf, forbidden } = require('./authMiddleware');
 
+// Límite de notas del plan FREE
+const FREE_NOTES_LIMIT = 5;
 
-// === CREATE ===  
-// routerNotes.post('/', (req, res) => {
-//     console.log('Guardando nota...');
-//     if(!req.body.User_id || !req.body.titulo || !req.body.contenido){
-//         return res.status(400).json({
-//             error: "Faltan datos requeridos", 
-//             required: ["User_id", "titulo", "contenido"]
-//         });
-//     }
-    
-//     let newNote = {
-//         User_id: req.body.User_id, 
-//         titulo: req.body.titulo, 
-//         contenido: req.body.contenido
-//     };
+// Todas las rutas de notas requieren sesión
+routerNotes.use(verifyToken);
 
-//     let note = Notes(newNote);
+// === CREATE ===
+routerNotes.post('/', async (req, res) => {
+    try {
+        const { User_id, titulo, contenido } = req.body;
 
+        if (!User_id || !titulo || !contenido) {
+            return res.status(400).json({
+                error: "Faltan datos requeridos",
+                required: ["User_id", "titulo", "contenido"]
+            });
+        }
+        if (!isSelf(req, User_id)) {
+            return forbidden(res);
+        }
 
+        const user = await User.findById(User_id);
+        if (!user) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
 
-//     note.save()
-//         .then((doc) => {
-//             console.log("Nota creada! " + doc);
-//             res.status(201).json({
-//                 message: "Nota creada con éxito!", 
-//                 note: doc
-//             });
-//         })
-//         .catch((err) =>{
-//             console.error("Error al guardar la nota" + err);
-//             res.status(500).json({
-//                 error: "Hubo un error interno", 
-//                 details: err.message
-//             });
-//         });
-// });
+        // Plan FREE: máximo 5 notas
+        if (user.Is_free) {
+            const count = await Notes.countDocuments({ User_id });
+            if (count >= FREE_NOTES_LIMIT) {
+                return res.status(403).json({
+                    error: "Límite de notas alcanzado",
+                    message: `Tu plan FREE solo permite ${FREE_NOTES_LIMIT} notas`
+                });
+            }
+        }
 
-// CREATE CON LOS PLANES IMPLEMENTADOS. 
-routerNotes.post('/', (req, res) => {
-    console.log('Guardando nota...');
+        const doc = await Notes.create({ User_id, titulo, contenido });
+        const updatedUser = await User.findByIdAndUpdate(
+            User_id,
+            { $inc: { Numero_notes: 1 } },
+            { new: true }
+        );
 
-    // Validación de campos
-    if (!req.body.User_id || !req.body.titulo || !req.body.contenido) {
-        return res.status(400).json({
-            error: "Faltan datos requeridos",
-            required: ["User_id", "titulo", "contenido"]
+        res.status(201).json({
+            message: "Nota creada con éxito!",
+            note: doc,
+            numero_notes: updatedUser?.Numero_notes
         });
+    } catch (err) {
+        console.error("Error al guardar la nota:", err.message);
+        res.status(500).json({ error: "Hubo un error interno" });
     }
-
-    const userId = req.body.User_id;
-
-    // Buscar al usuario 
-    User.findById(userId)
-        .then(user => {
-            if (!user) {
-                return res.status(404).json({ error: "Usuario no encontrado" });
-            }
-
-            // Verificar si es free
-            if (user.Is_free) {
-                // Contar notas del usuario
-                Notes.countDocuments({ User_id: userId })
-                    .then(count => {
-
-                        if (count >= 5) {
-                            return res.status(403).json({
-                                error: "Límite de notas alcanzado",
-                                message: "Tu plan FREE solo permite 5 notas"
-                            });
-                        }
-
-                        // Crear la nota normalmente
-                        let newNote = {
-                            User_id: req.body.User_id,
-                            titulo: req.body.titulo,
-                            contenido: req.body.contenido
-                        };
-
-                        let note = new Notes(newNote);
-
-                        note.save()
-                            .then(doc => {
-                                // Incrementar el contador de notas en el usuario FREE
-                                User.findByIdAndUpdate(
-                                    userId,
-                                    { $inc: { Numero_notes: 1 } },
-                                    { new: true }
-                                )
-                                .then(updatedUser => {
-                                    console.log("Nota creada! ", doc);
-                                    res.status(201).json({
-                                        message: "Nota creada con éxito!",
-                                        note: doc,
-                                        numero_notes: updatedUser.Numero_notes
-                                    });
-                                })
-                                .catch(err => {
-                                    console.error("Error al actualizar contador de notas:", err);
-                                    res.status(201).json({
-                                        message: "Nota creada, pero ocurrió un error actualizando el contador",
-                                        note: doc
-                                    });
-                                });
-                            })
-                            .catch(err => {
-                                console.error("Error al guardar la nota:", err);
-                                res.status(500).json({
-                                    error: "Hubo un error interno",
-                                    details: err.message
-                                });
-                            });
-
-                    })
-                    .catch(err => {
-                        console.error("Error al contar notas:", err);
-                        res.status(500).json({ error: "Error interno al contar notas" });
-                    });
-
-            } else {
-                // Usuario premium → crear nota directo
-                let newNote = {
-                    User_id: req.body.User_id,
-                    titulo: req.body.titulo,
-                    contenido: req.body.contenido
-                };
-
-                let note = new Notes(newNote);
-
-                note.save()
-                    .then(doc => {
-                        // Incrementar contador también para premium
-                        User.findByIdAndUpdate(
-                            userId,
-                            { $inc: { Numero_notes: 1 } },
-                            { new: true }
-                        )
-                        .then(updatedUser => {
-                            console.log("Nota creada! ", doc);
-                            res.status(201).json({
-                                message: "Nota creada con éxito!",
-                                note: doc,
-                                numero_notes: updatedUser.Numero_notes
-                            });
-                        })
-                        .catch(err => {
-                            console.error("Error al actualizar contador en premium:", err);
-                            res.status(201).json({
-                                message: "Nota creada, pero no se pudo actualizar el contador",
-                                note: doc
-                            });
-                        });
-                    })
-                    .catch(err => {
-                        console.error("Error al guardar la nota:", err);
-                        res.status(500).json({
-                            error: "Hubo un error interno",
-                            details: err.message
-                        });
-                    });
-            }
-        })
-        .catch(err => {
-            console.error("Error al buscar usuario:", err);
-            res.status(500).json({ error: "Error interno al verificar usuario" });
-        });
 });
-
 
 // === READ ===
-routerNotes.get('/',verifyToken, (req, res) =>{
-    console.log("Consultando notas");
-    let Userid = req.query.User_id; 
-
-    if(!Userid){
-        return res.status(400).json({error: "El user ID es requerido"});
-    }
-
-    Notes.find({User_id: Userid})
-        .sort({createdAt: -1}) // -> Esto ordena por notas más recientes primero
-        .then((docs) =>{
-            console.log(`Encontradas ${docs.length} notas`);
-            res.json(docs);
-        })
-        .catch((err) =>{
-            console.error("Error al consultar las notas: ", err);
-            res.status(500).json({error: "Error al obtener notas"});
-        });
-});
-
-// === UPDATE === 
-routerNotes.put('/:id', (req, res) =>{
-    console.log("Actualizando nota...", req.params.id);
-
-    let updateData = {};
-
-    if(req.body.titulo !== undefined){
-        updateData.titulo = req.body.titulo;
-    }
-
-    if(req.body.contenido !== undefined){
-        updateData.contenido = req.body.contenido;
-    }
-
-    if(Object.keys(updateData).length == 0){
-        return res.status(400).json({error: "No hay datos para actualizar"});
-    }
-
-    Notes.findByIdAndUpdate(req.params.id, updateData, {new: true})
-        .then((doc) => {
-            if(!doc){
-                return res.status(404).json({error: "Nota no encontrada"});
-            }
-            console.log("Nota actualizada");
-            res.json({
-                message: "Nota actualizada correctamente", 
-                note: doc
-            })
-        })
-});
-
-// === DELETE ===
-routerNotes.delete('/:id', async (req, res) => {
-    console.log("Eliminando nota:", req.params.id);
-
+routerNotes.get('/', async (req, res) => {
     try {
-        // Buscar la nota primero (para obtener el User_id)
-        const note = await Notes.findById(req.params.id);
+        const Userid = req.query.User_id;
+        if (!Userid) {
+            return res.status(400).json({ error: "El user ID es requerido" });
+        }
+        if (!isSelf(req, Userid)) {
+            return forbidden(res);
+        }
+
+        const docs = await Notes.find({ User_id: Userid })
+            .sort({ createdAt: -1 }); // Notas más recientes primero
+        res.json(docs);
+    } catch (err) {
+        console.error("Error al consultar las notas:", err.message);
+        res.status(500).json({ error: "Error al obtener notas" });
+    }
+});
+
+// === UPDATE (solo notas propias) ===
+routerNotes.put('/:id', async (req, res) => {
+    try {
+        const updateData = {};
+        if (req.body.titulo !== undefined) {
+            updateData.titulo = req.body.titulo;
+        }
+        if (req.body.contenido !== undefined) {
+            updateData.contenido = req.body.contenido;
+        }
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ error: "No hay datos para actualizar" });
+        }
+
+        const doc = await Notes.findOneAndUpdate(
+            { _id: req.params.id, User_id: req.user.id },
+            updateData,
+            { new: true }
+        );
+        if (!doc) {
+            return res.status(404).json({ error: "Nota no encontrada" });
+        }
+
+        res.json({
+            message: "Nota actualizada correctamente",
+            note: doc
+        });
+    } catch (err) {
+        console.error("Error al actualizar la nota:", err.message);
+        res.status(500).json({ error: "Error al actualizar la nota" });
+    }
+});
+
+// === DELETE (solo notas propias) ===
+routerNotes.delete('/:id', async (req, res) => {
+    try {
+        const note = await Notes.findOneAndDelete({ _id: req.params.id, User_id: req.user.id });
         if (!note) {
             return res.status(404).json({ error: "Nota no encontrada" });
         }
 
-        const userId = note.User_id;
-
-        // Eliminar la nota
-        await Notes.findByIdAndDelete(req.params.id);
-        console.log("Nota eliminada correctamente");
-
-        // Decrementar el contador de notas del usuario (+ seguridad: nunca bajar de 0)
-        const updatedUser = await User.findByIdAndUpdate(
-            userId,
+        // Decrementar el contador sin bajar de 0
+        const updatedUser = await User.findOneAndUpdate(
+            { _id: note.User_id, Numero_notes: { $gt: 0 } },
             { $inc: { Numero_notes: -1 } },
             { new: true }
         );
 
-        console.log("Contador actualizado. Nuevo total:", updatedUser?.Numero_notes);
-
-        return res.json({
+        res.json({
             message: "Nota eliminada!",
             note: note,
             numero_notes: updatedUser?.Numero_notes
         });
-
     } catch (err) {
-        console.error("Error al eliminar nota:", err);
-        return res.status(500).json({ error: "Error al eliminar la nota" });
+        console.error("Error al eliminar nota:", err.message);
+        res.status(500).json({ error: "Error al eliminar la nota" });
     }
 });
 
-
-// Sin esta línea la cosa no jala, recuerda. 
 module.exports = routerNotes;

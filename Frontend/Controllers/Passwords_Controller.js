@@ -15,7 +15,6 @@ let currentUserId = null;
 // INICIALIZACIÓN
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('✅ Passwords_Controller cargado');
 
     // OBTENER TOKEN Y USER_ID DEL localStorage
     currentToken = localStorage.getItem('token');
@@ -28,8 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    console.log('🔑 Token encontrado:', currentToken.substring(0, 20) + '...');
-    console.log('👤 User ID:', currentUserId);
 
     // Cargar datos
     loadCards();
@@ -82,8 +79,6 @@ async function loadCards() {
         }
 
         const cards = await response.json();
-        console.log("Cards recibidas en front cifradas")
-        console.log(cards[0])
         // //Descifrado
         for (let card of cards) {
             card.cvv = await decryptData(card.cvv);
@@ -92,8 +87,6 @@ async function loadCards() {
             card.titular = await decryptData(card.titular);
             card.vencimiento = await decryptData(card.vencimiento);
         }
-        console.log("Cards recibidas POST DESCIFRADO")
-        console.log(cards[0])
         //Descifrado
         cardsCache = cards;
 
@@ -188,19 +181,14 @@ function setupAddCardForm() {
         e.preventDefault();
 
         const nombreTarjetaValue = document.getElementById('addCardName').value.trim();
-        console.log("nombreTarjeta:", nombreTarjetaValue);
 
         const titularValue = document.getElementById('addCardHolder').value.trim();
-        console.log("titular:", titularValue);
 
         const numeroTarjetaValue = document.getElementById('addCardNumber').value.replace(/\s/g, '');
-        console.log("numeroTarjeta:", numeroTarjetaValue);
 
         const vencimientoValue = document.getElementById('addCardExp').value.trim();
-        console.log("vencimiento:", vencimientoValue);
 
         const cvvValue = document.getElementById('addCardCVV').value.trim();
-        console.log("cvv:", cvvValue);
 
         const nuevaTarjeta = {
                 nombreTarjeta: await encryptData(nombreTarjetaValue) ,
@@ -306,22 +294,17 @@ function openEditCardModal(cardId) {
 
         // Variables individuales
         const nombreTarjeta = document.getElementById('editCardName').value.trim();
-        console.log("nombreTarjeta:", nombreTarjeta);
 
         const titular = document.getElementById('editCardHolder').value.trim();
-        console.log("titular:", titular);
 
         const numeroTarjeta = document
             .getElementById('editCardNumber')
             .value
             .replace(/\s/g, '');
-        console.log("numeroTarjeta:", numeroTarjeta);
 
         const vencimiento = document.getElementById('editCardExp').value.trim();
-        console.log("vencimiento:", vencimiento);
 
         const cvv = document.getElementById('editCardCVV').value.trim();
-        console.log("cvv:", cvv);
 
         const datosActualizados = {
             nombreTarjeta: await encryptData(nombreTarjeta),
@@ -438,8 +421,6 @@ async function loadPasswords() {
 
         const passwords = await response.json();
         //Descifrado
-        console.log("Password PRE CIFRADO")
-        console.log(passwords[0])
         
         for (let pwd of passwords) {
             pwd.password = await decryptData(pwd.password);
@@ -448,8 +429,6 @@ async function loadPasswords() {
             pwd.usuario = await decryptData(pwd.usuario);
         }
 
-        console.log("Password POST CIFRADO")
-        console.log(passwords[0])
 
         //Descifrado
 
@@ -592,16 +571,12 @@ function setupAddPasswordForm() {
         e.preventDefault();
 
         const sitioInput = document.getElementById('addPasswordSite').value.trim();
-        console.log("sitioInput:", sitioInput);
 
         const usuarioInput = document.getElementById('addPasswordUsername').value.trim();
-        console.log("usuarioInput:", usuarioInput);
 
         const passwordInput = document.getElementById('addPasswordPassword').value;
-        console.log("passwordInput:", passwordInput);
 
         const urlInput = document.getElementById('addPasswordUrl').value.trim();
-        console.log("urlInput:", urlInput);
 
         const nuevaPassword = {
             sitio: await encryptData(sitioInput),
@@ -693,16 +668,12 @@ function openEditPasswordModal(passwordId) {
 
         // Obtener valores en variables
         const sitio = document.getElementById('editPwdSite').value.trim();
-        console.log("sitio:", sitio);
 
         const usuario = document.getElementById('editPwdUsername').value.trim();
-        console.log("usuario:", usuario);
 
         const password = document.getElementById('editPwdPassword').value;
-        console.log("password:", password);
 
         const url = document.getElementById('editPwdUrl').value.trim();
-        console.log("url:", url);
 
         // Construir el objeto con las variables
         const datosActualizados = {

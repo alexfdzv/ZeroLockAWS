@@ -34,10 +34,8 @@ async function sendStegoToBackend() {
     }
         // 1. Read file content (PLAIN TEXT)
     const textContent = await readFileContent(selectedText);
-    console.log("Este es el texto a mandar:", textContent)
         // 2. Encrypt
     const encryptedText = await encryptData(textContent);
-    console.log("Texto cifrado:", encryptedText);
 
     const formData = new FormData();
     formData.append("image", selectedImage);
@@ -45,7 +43,6 @@ async function sendStegoToBackend() {
     formData.append("description", document.getElementById("description").value);
     formData.append("token", localStorage.getItem('token'));
     formData.append("user_id", localStorage.getItem('user_id'))
-    console.log(formData);
     const response = await fetch("/api/stego", {
         method: "POST",
         body: formData
@@ -112,10 +109,8 @@ async function loadSavedImages() {
         }
 
         const image_list = await response.json();
-        console.log(image_list)
         // === CREAR TABLA ===
         root.innerHTML = "";
-        console.log("Imágenes:", image_list.length)
         if(image_list.length === 0)
         {
             const info = document.createElement('p')
@@ -269,14 +264,10 @@ modalEdit.addEventListener('show.bs.modal', (event) => {
 
 confirmEditBtn.addEventListener('click', () => {
         event.preventDefault();
-        console.log("Holaaaa");
         let data_raw = new FormData(document.getElementById('FormEdit'));
         const data = Object.fromEntries(data_raw);
-        console.log("Data", data);
         let nombre = data_raw.get("nombre");
         let Descripción = data_raw.get("Descripción");
-        console.log("Nombre", nombre);
-        console.log("Descripción", Descripción);
         const id = confirmEditBtn.dataset.imageId;
         fetch('/api/stego/' + id, {
             method: 'PUT',
@@ -333,7 +324,6 @@ confirmDeleteBtn.addEventListener('click', () => {
     const id = confirmDeleteBtn.dataset.imageId;
     
     // Now you have the correct ID here
-    console.log("Deleting image with ID:", id);
 
     delete_img(id);
 });
@@ -341,7 +331,6 @@ confirmDeleteBtn.addEventListener('click', () => {
 
 async function delete_img(img_id)
 {
-    console.log("Borrando imagen con ID:", img_id);
     const user_id = localStorage.getItem('user_id');
     const response = await fetch(`/api/stego/${img_id}?user_id=${user_id}`, {
         method: "DELETE",
@@ -359,16 +348,12 @@ async function delete_img(img_id)
 
 async function retrieveData(img_id)
 {
-    console.log("ID", img_id);
     const response = await fetch("/api/stego/extract/" + img_id, {
         method: "GET",
     });
-    console.log(response.body);
     if (response.status === 200) {
         const data = await response.json();
-        console.log("Respuesta:", data);
         const info_descifrada = await decryptData(data.text);
-        console.log("Info descifrada:", info_descifrada)
         document.getElementById('Display_info').textContent = info_descifrada;
         return;
     }

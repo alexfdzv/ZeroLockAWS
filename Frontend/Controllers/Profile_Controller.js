@@ -177,7 +177,6 @@ function arraytobuffer64(buffer) {
 
 async function changePassword(event) {
     if(event) event.preventDefault();
-    console.log("Cambiando contraseña...");
 
     // Obtener valores directamente de los inputs
     const oldPassword = document.getElementById('oldPassword')?.value || 
@@ -246,7 +245,6 @@ async function changePassword(event) {
             ["encrypt", "decrypt"]
         );
 
-        console.log("Master Key unwrapped correctamente");
 
         // 5. RE-WRAP: Generar nuevo salt para la nueva contraseña
         const newSaltBuffer = crypto.getRandomValues(new Uint8Array(16));
@@ -291,7 +289,6 @@ async function changePassword(event) {
             iteration: 100000
         };
 
-        console.log("Master Key re-wrapped con nueva contraseña");
 
         // 9. Enviar al servidor
         const token = localStorage.getItem('token');
@@ -414,11 +411,8 @@ const profileImg = document.getElementById("profileImage");
 async function loadUserProfileImage() {
     const userId = localStorage.getItem("user_id");
     
-    console.log('🔍 Intentando cargar imagen para user_id:', userId);
     
     if (!userId) {
-        console.log('❌ No hay user_id en localStorage');
-        console.log('📋 Contenido de localStorage:', localStorage);
         return;
     }
 
@@ -426,19 +420,27 @@ async function loadUserProfileImage() {
         const res = await fetch(`/api/profile/image?user_id=${userId}`);
         const data = await res.json();
 
-        console.log('📡 Respuesta del servidor:', data);
 
         if (data.success && data.profileImage) {
-            profileImg.src = data.profileImage;
-            console.log('✅ Imagen cargada desde BD:', data.profileImage);
+            profileImg.src = await loadPhotoAsBlobUrl(data.profileImage);
         } else {
-            console.log('⚠️ No hay imagen guardada para este usuario');
             profileImg.src = '../Assets/defualt_usear.jpg';
         }
     } catch (err) {
         console.error("❌ Error cargando imagen:", err);
         profileImg.src = '../Assets/defualt_usear.jpg';
     }
+}
+
+// La foto se pide con el token de sesión (la ruta está protegida) y se
+// muestra como un objeto local del navegador.
+async function loadPhotoAsBlobUrl(path) {
+    const res = await fetch(path);
+    if (!res.ok) {
+        return '../Assets/defualt_usear.jpg';
+    }
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
 }
 
 // Ejecutar al cargar la página
@@ -459,11 +461,9 @@ if (uploadBtn && fileInput && profileImg) {
         
         if (!userId) {
             alert('Error: No hay user_id en localStorage. Por favor inicia sesión de nuevo.');
-            console.log('📋 Contenido de localStorage:', localStorage);
             return;
         }
 
-        console.log('📤 Subiendo imagen para user_id:', userId);
 
         const formData = new FormData();
         formData.append("photo", file);
@@ -480,12 +480,10 @@ if (uploadBtn && fileInput && profileImg) {
 
             const data = await res.json();
 
-            console.log('📡 Respuesta al subir:', data);
 
             if (data.success) {
-                profileImg.src = data.path;
+                profileImg.src = await loadPhotoAsBlobUrl(data.path);
                 alert("✅ Imagen actualizada con éxito!");
-                console.log('✅ Nueva imagen guardada en BD:', data.path);
             } else {
                 alert("Error: " + data.error);
                 console.error('❌ Error del servidor:', data.error);
@@ -502,7 +500,6 @@ if (uploadBtn && fileInput && profileImg) {
 }
 
 // DEBUG: Mostrar user_id actual
-console.log('👤 User ID actual:', localStorage.getItem("user_id"));
 
 
 

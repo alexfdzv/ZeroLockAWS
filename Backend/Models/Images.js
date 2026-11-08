@@ -17,16 +17,13 @@ let imageSchema = mongoose.Schema({
     creation: {
         type: Date,
         required: true,
-        default: new Date()
+        default: Date.now // se evalúa en cada documento (new Date() fijaba la fecha al arrancar)
     },
     description: {
         type: String,
         required: true
     }
 });
-
-// Creamos el modelo (nombre, esquema)
-let Image = mongoose.model('image', imageSchema);
 
 // Exportamos el modelo para poder usarlo en otros archivos. 
 module.exports = mongoose.model('image', imageSchema);

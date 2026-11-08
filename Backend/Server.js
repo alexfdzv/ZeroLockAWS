@@ -58,6 +58,24 @@ app.get('/health', (req, res) => {
 // Rutas API (CloudFront manda todo lo de /api/* al ALB)
 app.use('/api', router);
 
+// Manejo de errores: responde JSON en lugar de dejar la petición colgada
+// (por ejemplo, un archivo demasiado grande o un id con formato inválido)
+app.use((err, req, res, next) => {
+    if (err.name === 'MulterError') {
+        return res.status(400).json({ error: `Archivo no válido: ${err.message}` });
+    }
+    if (err.name === 'CastError') {
+        return res.status(400).json({ error: 'Identificador inválido' });
+    }
+    console.error('Error no controlado:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+});
+
+// Evita que una promesa rechazada sin manejar detenga todo el servidor
+process.on('unhandledRejection', (reason) => {
+    console.error('Promesa rechazada sin manejar:', reason);
+});
+
 
 // Inicio de server
 app.listen(port, ()=> {
