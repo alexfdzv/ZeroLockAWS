@@ -36,9 +36,15 @@ db.on('error', (err) => {
     console.error("Error de conexión a la base de datos:", err.message);
 });
 
-mongoose.connect(mongoConnection).catch((err) => {
-    console.error("No se pudo conectar a la base de datos:", err.message);
-});
+// Si la BD no está disponible al arrancar (por ejemplo, DocumentDB detenido),
+// se reintenta cada 5 segundos en lugar de quedarse sin conexión.
+function connectWithRetry() {
+    mongoose.connect(mongoConnection).catch((err) => {
+        console.error("No se pudo conectar a la base de datos, reintentando en 5 s:", err.message);
+        setTimeout(connectWithRetry, 5000);
+    });
+}
+connectWithRetry();
 
 // Health check para el Target Group del ALB.
 // Responde 200 mientras el proceso esté vivo e informa el estado de la BD.
