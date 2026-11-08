@@ -11,8 +11,38 @@ function required(name) {
     return value;
 }
 
+// Cadena de conexión a la base de datos.
+// - Desarrollo local: se define MONGO_URI (por ejemplo, una MongoDB en Docker).
+// - AWS: se arma con las llaves del secreto para Amazon DocumentDB, con TLS.
+function buildMongoUri() {
+    if (process.env.MONGO_URI) {
+        return process.env.MONGO_URI;
+    }
+
+    const user = encodeURIComponent(required('DOCDB_USER'));
+    const password = encodeURIComponent(required('DOCDB_PASSWORD'));
+    const host = required('DOCDB_HOST');
+    const port = process.env.DOCDB_PORT || '27017';
+    const dbName = process.env.DOCDB_NAME || 'ZeroLock';
+    const caFile = process.env.DOCDB_CA_FILE || '/opt/zerolock/global-bundle.pem';
+
+    // Parámetros que pide DocumentDB:
+    // - tls + tlsCAFile: conexión cifrada validando el certificado de AWS
+    // - replicaSet=rs0: el driver detecta la primaria y la réplica, y sigue
+    //   funcionando si DocumentDB hace failover
+    // - retryWrites=false: DocumentDB no soporta escrituras reintentables
+    const params = new URLSearchParams({
+        tls: 'true',
+        tlsCAFile: caFile,
+        replicaSet: 'rs0',
+        retryWrites: 'false',
+    });
+
+    return `mongodb://${user}:${password}@${host}:${port}/${dbName}?${params.toString()}`;
+}
+
 module.exports = {
     port: Number(process.env.PORT) || 3000,
-    mongoUri: required('MONGO_URI'),
+    mongoUri: buildMongoUri(),
     jwtSecret: required('JWT_SECRET'),
 };
