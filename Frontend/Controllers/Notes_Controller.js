@@ -1,4 +1,4 @@
-const apiNotesUrl = "http://localhost:3000/notes";
+const apiNotesUrl = "/api/notes";
 const userId = localStorage.getItem("user_id");
 const authToken = localStorage.getItem('token');
 

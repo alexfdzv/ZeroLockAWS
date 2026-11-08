@@ -10,7 +10,7 @@ async function checkAccess() {
         return;
     }
 
-    const res = await fetch("/hashes/verify", {
+    const res = await fetch("/api/hashes/verify", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` }
     });

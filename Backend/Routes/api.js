@@ -1,5 +1,4 @@
 const express = require('express'); 
-const path = require('path');
 const routerApi = express.Router();
 const routerUser = require('./User_routes');
 const routerNotes = require('./Notes_routes');
@@ -9,26 +8,7 @@ const routerHashes = require('./Hashes_routes');
 const profileRoutes = require('./Profile_routes');
 
 
-// Declaración de las rutas 
-routerApi.get('/Login.html', (req, res) => 
-  res.sendFile(path.join(__dirname, '../../Frontend/Views/Login.html'))
-);
-routerApi.get('/Profile.html', (req, res) => 
-  res.sendFile(path.join(__dirname, '../../Frontend/Views/Profile.html'))
-);
-routerApi.get('/Passwords.html', (req, res) => 
-  res.sendFile(path.join(__dirname, '../../Frontend/Views/Passwords.html'))
-);
-routerApi.get('/Notes.html', (req, res) => 
-  res.sendFile(path.join(__dirname, '../../Frontend/Views/Notes.html'))
-);
-routerApi.get('/Stego.html', (req, res) => 
-  res.sendFile(path.join(__dirname, '../../Frontend/Views/Stego.html'))
-);
-routerApi.get('/Hashes.html', (req, res) => 
-  res.sendFile(path.join(__dirname, '../../Frontend/Views/Hashes.html'))
-);
-
+// Rutas de la API (se montan bajo /api en Server.js)
 routerApi.post('/login', routerUser);
 
 routerApi.use("/users", routerUser);

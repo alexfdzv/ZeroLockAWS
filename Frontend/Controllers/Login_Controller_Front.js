@@ -29,7 +29,7 @@ async function login(){
     let json = Object.fromEntries(data.entries());
     console.log("Correo: ", json.correo);
     console.log("Password: ", json.pass);
-    fetch('/login', {
+    fetch('/api/login', {
         method: 'POST', 
         headers: {
             'Content-Type': 'application/json'
@@ -197,7 +197,7 @@ async function register(event){
     console.log("JSON FINAL: ", json);
     console.log("Wrapped", wrappedMK);
     console.log("Salt: ", salt64);
-    fetch(local_url + '/users', {
+    fetch(local_url + '/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(json)

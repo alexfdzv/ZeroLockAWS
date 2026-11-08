@@ -46,7 +46,7 @@ async function sendStegoToBackend() {
     formData.append("token", localStorage.getItem('token'));
     formData.append("user_id", localStorage.getItem('user_id'))
     console.log(formData);
-    const response = await fetch("/stego", {
+    const response = await fetch("/api/stego", {
         method: "POST",
         body: formData
     });
@@ -74,7 +74,7 @@ async function sendStegoToBackend() {
 
 const userId = localStorage.getItem('user_id'); 
 const authToken = localStorage.getItem('token'); 
-const apiBaseUrl = 'http://localhost:3000/stego';
+const apiBaseUrl = '/api/stego';
 const delbtn = document.getElementById("btn_borrar")
 
 //Raíz de la tabla (DOM)
@@ -278,7 +278,7 @@ confirmEditBtn.addEventListener('click', () => {
         console.log("Nombre", nombre);
         console.log("Descripción", Descripción);
         const id = confirmEditBtn.dataset.imageId;
-        fetch('/stego/' + id, {
+        fetch('/api/stego/' + id, {
             method: 'PUT',
             headers: {
                 "Content-Type": "application/json"
@@ -343,7 +343,7 @@ async function delete_img(img_id)
 {
     console.log("Borrando imagen con ID:", img_id);
     const user_id = localStorage.getItem('user_id');
-    const response = await fetch(`/stego/${img_id}?user_id=${user_id}`, {
+    const response = await fetch(`/api/stego/${img_id}?user_id=${user_id}`, {
         method: "DELETE",
     });
     if (response.status === 200) {
@@ -360,7 +360,7 @@ async function delete_img(img_id)
 async function retrieveData(img_id)
 {
     console.log("ID", img_id);
-    const response = await fetch("/stego/extract/" + img_id, {
+    const response = await fetch("/api/stego/extract/" + img_id, {
         method: "GET",
     });
     console.log(response.body);

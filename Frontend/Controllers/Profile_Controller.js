@@ -3,7 +3,7 @@
 // =========================================================
 const userId = localStorage.getItem('user_id'); 
 const authToken = localStorage.getItem('token'); 
-const apiBaseUrl = 'http://localhost:3000/users'; 
+const apiBaseUrl = '/api/users'; 
 
 const local_url = "";
 
@@ -297,7 +297,7 @@ async function changePassword(event) {
         const token = localStorage.getItem('token');
         const user_id = localStorage.getItem('user_id');
 
-        const response = await fetch(local_url + '/users', {
+        const response = await fetch(local_url + '/api/users', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -375,7 +375,7 @@ async function deleteAccount() {
     }
 
     try {
-        const res = await fetch(`/users/${userId}`, {
+        const res = await fetch(`/api/users/${userId}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -423,7 +423,7 @@ async function loadUserProfileImage() {
     }
 
     try {
-        const res = await fetch(`/profile/image?user_id=${userId}`);
+        const res = await fetch(`/api/profile/image?user_id=${userId}`);
         const data = await res.json();
 
         console.log('📡 Respuesta del servidor:', data);
@@ -473,7 +473,7 @@ if (uploadBtn && fileInput && profileImg) {
         uploadBtn.disabled = true;
 
         try {
-            const res = await fetch("/profile/upload", {
+            const res = await fetch("/api/profile/upload", {
                 method: "POST",
                 body: formData
             });
