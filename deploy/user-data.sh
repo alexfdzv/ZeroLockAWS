@@ -63,7 +63,8 @@ Wants=network-online.target
 User=zerolock
 WorkingDirectory=$APP_DIR/app/Backend
 ExecStartPre=+$APP_DIR/load-secrets.sh
-EnvironmentFile=$APP_DIR/app.env
+# El guion hace opcional el archivo: no existe hasta que corre ExecStartPre
+EnvironmentFile=-$APP_DIR/app.env
 ExecStart=/usr/bin/node Server.js
 Restart=always
 RestartSec=5
